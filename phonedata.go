@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"runtime"
 )
 
 const (
@@ -47,16 +46,22 @@ var (
 )
 
 func init() {
-	dir := os.Getenv("PHONE_DATA_DIR")
-	if dir == "" {
-		_, fulleFilename, _, _ := runtime.Caller(0)
-		dir = path.Dir(fulleFilename)
-	}
 	var err error
-	content, err = ioutil.ReadFile(path.Join(dir, PHONE_DAT))
-	if err != nil {
-		panic(err)
+
+	dir := os.Getenv("PHONE_DATA_DIR")
+	if dir != "" {
+		content, err = ioutil.ReadFile(path.Join(dir, PHONE_DAT))
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		content, err = Asset(PHONE_DAT)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("加载数据成功", len(content))
 	}
+
 	total_len = int32(len(content))
 	firstoffset = get4(content[INT_LEN : INT_LEN*2])
 }
